@@ -1,52 +1,76 @@
 require "minitest/autorun"
 require "time"
 
-def nightly_charge(start_time, end_time)
-  adjusted_start = start_time + hours_to_seconds(7)
-  adjusted_end   = end_time   + hours_to_seconds(7)
+
+class Babysitter
+  SB_RATE = 12
+  BEDTIME = 21
   
-  if adjusted_start.hour  > 11
-    raise "Started before 5:00PM"
-  end
+  # Returns the charge for working from START_TIME to END_TIME.
+  #
+  # START_TIME and END_TIME must be between the working hours, and START_TIME
+  # must come before END_TIME.
+  def nightly_charge(start_time, end_time)
+    adjusted_start = (start_time + 7) % 24
+    adjusted_end   = (end_time   + 7) % 24
+    
+    if adjusted_start  > 11
+      raise "Started before 5:00PM"
+    end
 
-  if adjusted_end.hour  > 11
-    raise "Ended after 4:00AM"
-  end
+    if adjusted_end  > 11
+      raise "Ended after 4:00AM"
+    end
 
 
-  if adjusted_start.hour > adjusted_end.hour
-    raise "Start time occurs after the end time"
+    if adjusted_start > adjusted_end
+      raise "Start time occurs after the end time"
+    end
+
+    12
   end
 end
 
-# Returns NUM hours in seconds
-def hours_to_seconds(num)
-  num * 60 * 60
-end
+
+
+
+
+
 
 describe "The nightly charge" do
   before do
-    @three_am   = Time.parse("03:00")
-    @six_pm     = Time.parse("18:00")
-    @five_am    = Time.parse("05:00")
+    @bs = Babysitter.new
+    
+    @three_am   = 3
+    @six_pm     = 18
+    @five_am    = 5
+
+    @sb_rate = Babysitter::SB_RATE
+    @bedtime = Babysitter::BEDTIME
   end
   
   it "is invalid if work starts outside work hours" do
     lambda {
-      nightly_charge @five_am, @six_pm
+      @bs.nightly_charge @five_am, @six_pm
     }.must_raise StandardError
    end
 
   it "is invalid if work ends outside work hours" do   
     lambda {
-      nightly_charge @three_am, @five_am
+      @bs.nightly_charge @three_am, @five_am
     }.must_raise StandardError
   end
 
   it "is invalid if end time comes before start time" do
     lambda {
-      nightly_charge @three_am, @six_pm
+      @bs.nightly_charge @three_am, @six_pm
     }.must_raise StandardError
   end
 
+  it "Should pay SB rate if work starts and ends by bedtime" do
+    s = @bedtime - 2
+    e = @bedtime - 1
+    
+    @bs.nightly_charge(s, e).must_equal @sb_rate*(e-s)
+  end
 end
