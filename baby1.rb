@@ -34,6 +34,8 @@ class Babysitter
       (stop - start)*BM_RATE
     elsif start < bed && stop > mid
       (bed - start)*SB_RATE + (mid - bed)*BM_RATE + (stop - mid)*ME_RATE
+    elsif start < mid && stop > mid
+       (mid - start)*BM_RATE + (stop - mid)*ME_RATE
     end
   end
 
@@ -64,6 +66,7 @@ describe "The nightly charge" do
     
     @bedtime = Babysitter::BEDTIME
     @midnight = Babysitter::MIDNIGHT
+    @work_end = Babysitter::WORK_END
   end
   
   it "is invalid if work starts outside work hours" do
@@ -112,5 +115,12 @@ describe "The nightly charge" do
   @bs.nightly_charge(s, e).must_equal @sb_rate +
     (@midnight - @bedtime)*@bm_rate +
     @me_rate
+  end
+
+  it "Should pay BM and ME rates if work starts after bedtime but before midnight, and ends after midnight" do
+    s = @midnight - 1
+    e = @work_end
+
+    @bs.nightly_charge(s, e).must_equal @bm_rate + @work_end*@me_rate
   end
 end
