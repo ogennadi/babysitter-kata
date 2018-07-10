@@ -1,12 +1,11 @@
 require "minitest/autorun"
-require "time"
-
 
 class Babysitter
   SB_RATE = 12
   BM_RATE = 8
   ME_RATE = 16
 
+  WORK_START = 17
   BEDTIME  = 21
   MIDNIGHT = 24
   WORK_END = 4
@@ -32,9 +31,9 @@ class Babysitter
       (bed - start)*SB_RATE + (stop - bed)*BM_RATE
     elsif start < mid && stop   <= mid
       (stop - start)*BM_RATE
-    elsif start = bed && stop > mid
+    elsif start < bed && stop > mid
       (bed - start)*SB_RATE + (mid - bed)*BM_RATE + (stop - mid)*ME_RATE
-    elsif start = mid && stop > mid
+    elsif start < mid && stop > mid
       (mid - start)*BM_RATE + (stop - mid)*ME_RATE
     elsif start < work_end && stop <= work_end
       (stop - start)*ME_RATE
@@ -45,8 +44,9 @@ class Babysitter
 
 
   private
+  # Adjust HOUR to a 24-hour clock where midnight is at WORK_START
   def adjusted(hour)
-    (hour + 7) % 24
+    (hour + (24 - WORK_START)) % 24
   end
 end
 
