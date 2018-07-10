@@ -16,24 +16,15 @@ class Babysitter
   # START_TIME and END_TIME must be between the working hours, and START_TIME
   # must come before END_TIME.
   def nightly_charge(start_time, end_time)
-
     start = adjusted(start_time)
     stop  = adjusted(end_time)
     bed   = adjusted(BEDTIME)
     mid   = adjusted(MIDNIGHT)
+    work_end = adjusted(WORK_END)
 
-
-    if start > 11
-      raise "Started before 5:00PM"
-    end
-
-    if stop > 11
-      raise "Ended after 4:00AM"
-    end
-
-    if start > stop
-      raise "Start time occurs after the end time"
-    end
+    raise "Started before 5:00PM" if start > work_end
+    raise "Ended after 4:00AM"    if stop > work_end
+    raise "Start time occurs after the end time"    if start > stop
 
     if start < bed && stop   <= bed
       (stop - start)*SB_RATE
@@ -100,7 +91,7 @@ describe "The nightly charge" do
     s = @bedtime - 1
     e = @midnight
 
-    @bs.nightly_charge(s, e).must_equal @sb_rate + (@midnight - @bedtime)*@bm_rate
+    @bs.nightly_charge(s, e).must_equal @sb_rate + (e - @bedtime)*@bm_rate
   end
 
   it "Should pay BM rates if work starts and ends after bedtime and before midnight" do
