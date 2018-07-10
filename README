@@ -1,0 +1,10 @@
+Babysitter
+==========
+
+This repo implements the Babysitter class as described in the Babysitter kata (https://github.com/PillarTechnology/kata-babysitter).
+
+You'll need Ruby 2.5. To run the test suite, simply enter the directory and execute:
+
+    ruby babysitter.rb
+
+You should see a message showing that all the tests pass.
