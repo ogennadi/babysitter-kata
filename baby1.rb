@@ -32,10 +32,14 @@ class Babysitter
       (bed - start)*SB_RATE + (stop - bed)*BM_RATE
     elsif start < mid && stop   <= mid
       (stop - start)*BM_RATE
-    elsif start < bed && stop > mid
+    elsif start = bed && stop > mid
       (bed - start)*SB_RATE + (mid - bed)*BM_RATE + (stop - mid)*ME_RATE
-    elsif start < mid && stop > mid
-       (mid - start)*BM_RATE + (stop - mid)*ME_RATE
+    elsif start = mid && stop > mid
+      (mid - start)*BM_RATE + (stop - mid)*ME_RATE
+    elsif start < work_end && stop <= work_end
+      (stop - start)*ME_RATE
+    else
+      raise "invalid rate"
     end
   end
 
@@ -122,5 +126,12 @@ describe "The nightly charge" do
     e = @work_end
 
     @bs.nightly_charge(s, e).must_equal @bm_rate + @work_end*@me_rate
+  end
+
+  it "Should pay ME rate if work starts and ends after midnight" do
+    s = @work_end - 1
+    e = @work_end
+
+    @bs.nightly_charge(s, e).must_equal (e-s)*@me_rate
   end
 end
